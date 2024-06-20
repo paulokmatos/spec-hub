@@ -9,9 +9,6 @@ use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
 class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         // Telescope::night();
@@ -20,7 +17,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 
         $isLocal = $this->app->environment('local');
 
-        Telescope::filter(function (IncomingEntry $entry) use ($isLocal) {
+        Telescope::filter(static function (IncomingEntry $entry) use ($isLocal) {
             return $isLocal ||
                    $entry->isReportableException() ||
                    $entry->isFailedRequest() ||
@@ -55,11 +52,9 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     protected function gate(): void
     {
-        Gate::define('viewTelescope', function ($user) {
-            return in_array($user->email, [
-                'paulo@forpoeple.io',
-                'admin@forpeople.io',
-            ]);
+        Gate::define('viewTelescope', static function ($user) {
+            return in_array($user->email, config('spec-services.allowed_emails.global', []), true)
+                || in_array($user->email, config('spec-services.allowed_emails.telescope', []), true);
         });
     }
 }

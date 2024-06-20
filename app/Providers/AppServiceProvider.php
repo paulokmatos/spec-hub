@@ -7,26 +7,19 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
-        Gate::define('viewLogViewer', function ($user) {
-            return in_array($user->email, [
-                'paulo@forpoeple.io',
-                'admin@forpeople.io',
-            ]);
+        Gate::define('viewLogViewer', static function ($user) {
+            return in_array($user->email, config('spec-services.allowed_emails.global', []), true)
+                || in_array($user->email, config('spec-services.allowed_emails.log_viewer', []), true);
         });
     }
 
     public function boot(): void
     {
-        Gate::define('viewPulse', function ($user) {
-            return in_array($user->email, [
-                'paulo@forpoeple.io',
-                'admin@forpeople.io',
-            ]);
+        Gate::define('viewPulse', static function ($user) {
+            return in_array($user->email, config('spec-services.allowed_emails.global', []), true)
+                || in_array($user->email, config('spec-services.allowed_emails.pulse', []), true);
         });
     }
 }
